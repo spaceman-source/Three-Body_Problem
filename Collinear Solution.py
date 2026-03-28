@@ -199,7 +199,7 @@ ax1.set_ylabel('y (AU)')
 ax1.set_aspect('equal')
 ax1.grid(True, linestyle='--', alpha=0.5)
 
-# Right plor, Energy Drift
+# Right plot, Energy Drift
 ax2.plot(energy_time, total_energy, 'b-')
 ax2.set_xlabel('Time (years)')
 ax2.set_ylabel('Relative Energy Change')
