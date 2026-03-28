@@ -1,2 +1,4 @@
 # Three-Body_Problem
-Simulation and Figures of the Collinear (Euler)  solution, Triangular (Lagrange) solution, and the Periodic (Figure 8) solution.
+
+This repository is associated with a poster over the special solutions to the three-body problem.
+Consists of Simulation of the Collinear (Euler) solution, Triangular (Lagrange) solution, and the Periodic solution.
