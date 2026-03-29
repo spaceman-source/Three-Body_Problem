@@ -149,8 +149,7 @@ labels = ['Body 1 ', 'Body 2 ', 'Body 3 ']
 
 # Left trajectory plot 
 for i in range(n_bodies):
-    Ri = np.linalg.norm(positions_initial[i]) # Distance from origin, used to plot initial circles around each body
-
+    
     ax1.plot(traj[i][:, 0], traj[i][:, 1], # plots trajectory
              linewidth=0.8, alpha=0.6, color=colors[i])
 
