@@ -14,19 +14,15 @@ import matplotlib.style
 import numpy as np # Need this for math
 
 
-
 # Gravitational constant in terms of AU, Derived from Keplers 3rd Law, from Equation 1
 G = 4 * np.pi**2
-
 
 # Time step 
 dt = 1/1000
 
-
 # Total simulation time in years 
-t_finish = 5
+t_finish = 2.53   # Finish Time
 time = 0.0 # initial Time
-
 
 
 # Mass of planets stored in list
@@ -38,8 +34,10 @@ d = 2.0          # separation in AU
 m = 1.0          # equal masses solar masses
 
 
-# angular velocity for bodies
+# angular velocity for bodies need to be similar for outer bodies in circular orbits
 omega = np.sqrt(5 * G * m / (4 * d**3))
+
+
 
 # Positions: -d, 0, +d along x-axis
 positions = [
@@ -71,6 +69,7 @@ for i in range(n_bodies):
 
 energy_time = []      # time values for energy plot
 total_energy = []     # total energy at each time
+total_energyrel = []
 
 
 # Total Energy equals kinetic Energy + Potential Energy 
@@ -111,6 +110,7 @@ def accelerations(pos):
 acc = accelerations(positions) # compute initial acceleration using acceleration function
 
 
+E0 = total_energylist(positions, velocities)
 
 # Simulation loop Leapfrog Method, Equations 5 and 6 from Poster
 while time <= t_finish:
@@ -134,15 +134,15 @@ while time <= t_finish:
         trajectories[i].append(positions[i].copy())
 
 
-    # Energy conservation
-    E = total_energylist(positions, velocities) 
-    energy_time.append(time + dt)   # time after this step
-    total_energy.append(E)
-    
+    time += dt
 
-    # Update time and accelerations for next step
-    time = time + dt
+    # --- Append energy and time AFTER update ---
+    E = total_energylist(positions, velocities)
+    energy_time.append(time)                     # same length as total_energyrel
+    total_energyrel.append((E - E0)/E0)
+    
     acc = new_acc
+
 
 # Convert trajectories to arrays for plotting
 traj = [np.array(t) for t in trajectories]
@@ -166,25 +166,51 @@ x_ends, y_ends = [], []
 colors = ['blue', 'orange', 'purple']
 
 
+# Plots
+colors = ['blue', 'orange', 'purple']   # Colors for the three bodies in the trajectory plot    
+labels = ['Body 1', 'Body 2', 'Body 3'] # Labels for the three bodies in the trajectory plot
+colors2 = ['blue', 'orange', 'black']  # Colors for the trajectory lines, with the third body in black for better visibility
+shapes = ['o', 'd', 's']               # Marker shapes 
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), facecolor='white')    # Create a figure with two subplots side by side, one for the trajectory and one for the energy drift, with a white background
+
+
+
+ 
+ARROW_LEN    = 0.15   # bigger arrow
+ARROW_OFFSET = 0.1   # gap between arrowhead and final position
+
+
+# plot trajectories and energy drift
 for i in range(n_bodies):
-    ax1.plot(traj[i][:, 0], traj[i][:, 1], color= 'black') # Plots line of trajectory for all x and y values
+    x_ends.append(traj[i][-1, 0])
+    y_ends.append(traj[i][-1, 1])
+    ax1.plot(traj[i][:, 0], traj[i][:, 1],
+            color=colors2[i], lw=2.0, alpha=0.9, label=labels[i])
 
-    # This gets final Position of bodies and stores them
-    x_end = traj[i][-1, 0]
-    y_end = traj[i][-1, 1]
-    x_ends.append(x_end)
-    y_ends.append(y_end)
+    ax1.scatter(traj[i][0, 0], traj[i][0, 1],
+               color=colors[i], s=120, zorder=5,
+               edgecolors='black', linewidths=0.8, marker=shapes[i],
+               label=f'{labels[i]} Start')
 
-    ax1.scatter(x_end, y_end, color=colors[i], s=300, edgecolor='white', linewidth=1.5, zorder=5)
-    ax1.text(x_end + 0.1, y_end + 0.1, labels[i], fontsize=12) # Plot settings for dot representing body
+    end_i   = len(traj[i]) - 1
+    start_i = max(0, end_i - 40)
 
-    # Arrow to show direction of orbits
-    j = len(traj[i]) // 3 # 1/3 of the way through
-    dx = traj[i][j + 1, 0] - traj[i][j, 0]
-    dy = traj[i][j + 1, 1] - traj[i][j, 1]
-    ax1.arrow(traj[i][j, 0], traj[i][j, 1], dx, dy,
-              head_width=0.1, color=colors[i], length_includes_head=True)
+    tip       = traj[i][end_i,   :2]
+    tail      = traj[i][start_i, :2]
+    direction = tip - tail
+    norm      = np.linalg.norm(direction)
+    if norm > 0:
+        direction = direction / norm
 
+    arrow_tip  = tip - direction * ARROW_OFFSET
+    arrow_tail = arrow_tip - direction * ARROW_LEN
+ # arrow at end of trajectory to show direction of motion
+    ax1.annotate("",
+        xy=arrow_tip,
+        xytext=arrow_tail,
+        arrowprops=dict(arrowstyle="-|>", color=colors[i], lw=2.5, mutation_scale=20),
+        zorder=3,
+    )
 x_ends = np.array(x_ends)
 y_ends = np.array(y_ends)
 if np.max(x_ends) - np.min(x_ends) < 1e-6:
@@ -193,16 +219,16 @@ else:
     m, b = np.polyfit(x_ends, y_ends, 1)
     x_line = np.linspace(min(x_ends) - 1, max(x_ends) + 1, 100)
     ax1.plot(x_line, m * x_line + b, 'r--', linewidth=2)
-
+# Set limits, labels, grid
 ax1.set_xlabel('x (AU)')
 ax1.set_ylabel('y (AU)')
 ax1.set_aspect('equal')
 ax1.grid(True, linestyle='--', alpha=0.5)
 
 # Right plot, Energy Drift
-ax2.plot(energy_time, total_energy, 'b-')
+ax2.plot(energy_time[1:], total_energyrel,'b-')
 ax2.set_xlabel('Time (years)')
-ax2.set_ylabel('Relative Energy Change')
+ax2.set_ylabel('Relative Energy Change [(E-E0)/E0]')
 ax2.grid(True)
 plt.tight_layout()
 plt.show()

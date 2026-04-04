@@ -1,6 +1,7 @@
 
 """
     James Ward
+    3/29/26
     This Program examines the three-body problem specifically the triangular solution
     Masses are scaled in solar masses and distances are scaled in Astronomical Units.
 """
@@ -20,7 +21,7 @@ dt = 1/1000
 
 
 # Total simulation time in years 
-t_finish = 5
+t_finish = 1.633
 time = 0.0
 
 # triangular has unequal masses and triangular startup
@@ -66,6 +67,7 @@ energy_time = []      # time values for energy plot
 total_energy = []     # total energy at each time
 
 
+
 # Function for Energy Conservation, Equation 4 is just KE + PE
 def total_energylist(pos, vel):
     """Compute total mechanical energy (kinetic + potential)"""
@@ -85,8 +87,7 @@ energy_time.append(time)  # store time associated with energy
 total_energy.append(E0) # Store total energy of system
 
 
-
-# Function to compute accelerations from current positions
+# Function to compute accelerations from current positions Equation 3 from poster
 def accelerations(pos):
     acc = [np.zeros(2) for _ in range(n_bodies)] # start with no acceleration, sets initial accelerations to zero
     for i in range(n_bodies):   #  Loop through each body in system i is current body computing acceleration for
@@ -143,25 +144,61 @@ traj = [np.array(t) for t in trajectories]
 # Combined energy and trajectory plot
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-# Colors and Labels of bodies
-colors = ['blue', 'orange', 'purple']
-labels = ['Body 1 ', 'Body 2 ', 'Body 3 ']
+
+
+# Plots
+colors = ['blue', 'orange', 'purple']   # Colors for the three bodies in the trajectory plot    
+labels = ['Body 1', 'Body 2', 'Body 3'] # Labels for the three bodies in the trajectory plot
+colors2 = ['blue', 'orange', 'black']  # Colors for the trajectory lines, with the third body in black for better visibility
+shapes = ['o', 'd', 's']               # Marker shapes 
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), facecolor='white')    # Create a figure with two subplots side by side, one for the trajectory and one for the energy drift, with a white background
+
+
+
+
 
 # Left trajectory plot 
 for i in range(n_bodies):
-    
+    Ri = np.linalg.norm(positions_initial[i]) # Distance from origin, used to plot initial circles around each body
+
     ax1.plot(traj[i][:, 0], traj[i][:, 1], # plots trajectory
              linewidth=0.8, alpha=0.6, color=colors[i])
 
- # Add direction arrows
-    j = len(traj[i]) // 3 # 1/3 of the way through trajectory 
-    dx = traj[i][j + 1, 0] - traj[i][j, 0]
-    dy = traj[i][j + 1, 1] - traj[i][j, 1]
-    ax1.arrow(traj[i][j, 0], traj[i][j, 1], dx, dy,
-              head_width=0.04, color=colors[i], length_includes_head=True)
+ 
+ 
+ARROW_LEN    = 0.35  # bigger arrow
+ARROW_OFFSET = 0.0   # gap between arrowhead and final position
 
-    ax1.plot(*positions_initial[i], 'o', markersize=8,
-             color=colors[i], label=f'{labels[i]}  $R={Ri:.2f}$ AU')
+# Plot the triangle
+for i in range(n_bodies):
+    ax1.plot(traj[i][:, 0], traj[i][:, 1],
+            color=colors2[i], lw=2.0, alpha=0.9, label=labels[i])
+
+    ax1.scatter(traj[i][0, 0], traj[i][0, 1],
+               color=colors[i], s=120, zorder=5,
+               edgecolors='black', linewidths=0.8, marker=shapes[i],
+               label=f'{labels[i]} Start')
+
+    end_i   = len(traj[i])-1   # index of last point in trajectory
+    start_i = max(0, end_i - 40)
+
+    tip       = traj[i][end_i,   :2]
+    tail      = traj[i][start_i, :2]
+    direction = tip - tail
+    norm      = np.linalg.norm(direction)
+    if norm > 0:
+        direction = direction / norm
+
+    arrow_tip  = tip - direction * ARROW_OFFSET
+    arrow_tail = arrow_tip - direction * ARROW_LEN
+
+ # arrow at end of trajectory to show direction of motion
+    ax1.annotate("",
+        xy=arrow_tip,
+        xytext=arrow_tail,
+        arrowprops=dict(arrowstyle="-|>", color=colors[i], lw=2.5, mutation_scale=20),
+        zorder=3,
+    )
 
 
 # Plot the  triangle
@@ -176,22 +213,16 @@ ax1.set_xlabel('x (AU)', fontsize=13)
 ax1.set_ylabel('y (AU)', fontsize=13)
 ax1.set_aspect('equal')
 ax1.grid(True, linestyle='--', alpha=0.4)
-ax1.legend(fontsize=12, loc = 'upper right')
 
 # Energy Drift Plot
 energy_time = np.array(energy_time)
 total_energy = np.array(total_energy)
 relative_change = (total_energy - E0) / E0
-
+# energy plot
 ax2.plot(energy_time, relative_change, 'b-')
 ax2.set_xlabel('Time (years)', fontsize=13)
-ax2.set_ylabel('Relative Energy Change', fontsize=13)
+ax2.set_ylabel('Relative Energy Change [(E-E0)/E0]')
 ax2.grid(True)
 
 plt.tight_layout()
 plt.show()
-
-print(f"Initial energy: {E0:.6e} (solar mass * AU² / yr²)")
-print(f"Final energy:   {total_energy[-1]:.6e}")
-print(f"Relative change: {relative_change[-1]:.3e}")
-print(f"positions_initial: {positions_initial}")
