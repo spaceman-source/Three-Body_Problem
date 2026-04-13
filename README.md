@@ -5,4 +5,4 @@ Consists of Simulation of the Collinear (Euler) solution, Triangular (Lagrange) 
 
 ## Poster
 
-[Download the Three-Body Problem Poster (PDF)](POSTER%20%7BNumerical%20Simulation%20of%20Special%20Solutions%20to%20the%20Three-Body%20Problem%7D.pdf)
+[Download the Three-Body Problem Poster (PDF)](POSTER%20%7BNumerical%20Simulation%20of%20Special%20Solutions%20to%20the%20Three-Body%20Problem%7D)
