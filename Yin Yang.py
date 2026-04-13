@@ -7,11 +7,11 @@
 """
 James Ward
 3/31/26
-Yin-Yang 1a Orbit Simulation (Three-Body Problem)
+Yin-Yang  Orbit Simulation (Three-Body Problem)
 \I used G = 1 to simplify the equations and make the code cleaner, but the solution is still 
 valid in physical units as long as the initial conditions are scaled appropriately. The key is that the initial
 conditions (positions and velocities) must be chosen to satisfy the equations of motion under the chosen units. 
-The specific initial conditions for the Yin-Yang 1a orbit are derived from numerical searches for periodic solutions
+The specific initial conditions for the Yin-Yang  orbit are derived from numerical searches for periodic solutions
 in the three-body problem, and they can be expressed in any consistent set of units. So while G=1 simplifies the 
 code, it does not limit the generality of the solution as long as the initial conditions are correctly scaled.
 """
