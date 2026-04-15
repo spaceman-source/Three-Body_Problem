@@ -9,3 +9,4 @@ I plotted most of them in two dimensions for simplicity but also because the tra
 
 This repository is associated with a poster over the special solutions to the three-body problem. Linked below is the PDF of the poster.
 [Download the Three-Body Problem Poster (PDF)](https://github.com/spaceman-source/Three-Body_Problem/raw/main/POSTER%20%7BNumerical%20Simulation%20of%20Special%20Solutions%20to%20the%20Three-Body%20Problem%7D)
+![Poster](poster.png)
