@@ -136,7 +136,7 @@ while time <= t_finish:
 
     time += dt
 
-    # --- Append energy and time AFTER update ---
+    # Append Energy 
     E = total_energylist(positions, velocities)
     energy_time.append(time)                     # same length as total_energyrel
     total_energyrel.append((E - E0)/E0)
